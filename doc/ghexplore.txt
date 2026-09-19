@@ -1,0 +1,64 @@
+*ghexplore.txt*  Sandbox GitHub repos without leaving Neovim
+
+Author: ghexplore.nvim contributors
+License: MIT
+
+==============================================================================
+CONTENTS                                                *ghexplore-contents*
+
+  1. Intro ................... |ghexplore-intro|
+  2. Setup ................... |ghexplore-setup|
+  3. Commands ................ |ghexplore-commands|
+  4. Lua API ................. |ghexplore-api|
+  5. Health .................. |ghexplore-health|
+
+==============================================================================
+1. INTRO                                                *ghexplore-intro*
+
+ghexplore opens a sandboxed checkout of a GitHub repo you can explore,
+build, and edit, then discard or resume later. It can also grab single
+files without cloning (ghgrab parity).
+
+  :Ghexplore https://github.com/owner/repo
+  :GhexploreGrab https://github.com/owner/repo/blob/main/README.md
+
+M0 status: commands exist; open/grab/list/discard land in M2-M4.
+See PLAN.md for milestones.
+
+==============================================================================
+2. SETUP                                                *ghexplore-setup*
+
+>lua
+  require("ghexplore").setup({
+    download_path = vim.fn.expand("~/Downloads"),
+    jobs = 4,
+  })
+<
+
+Full defaults: `lua/ghexplore/config.lua`.
+
+==============================================================================
+3. COMMANDS                                             *ghexplore-commands*
+
+:Ghexplore [url] ......... Open sandbox (reuse if exists).
+:GhexploreGrab <url> [dest]  Grab single file, no clone.
+:GhexploreList ............ Resume a sandbox.
+:GhexploreDiscard [!] [name]  Delete a sandbox (! = no confirm).
+
+==============================================================================
+4. LUA API                                              *ghexplore-api*
+
+>lua
+  require("ghexplore").setup(opts)
+  require("ghexplore").open(url)
+  require("ghexplore").grab(file_url, dest)
+  require("ghexplore").list()
+  require("ghexplore").discard(name, bang)
+<
+
+==============================================================================
+5. HEALTH                                               *ghexplore-health*
+
+  :checkhealth ghexplore
+
+vim:tw=78:ts=8:ft=help:norl:
