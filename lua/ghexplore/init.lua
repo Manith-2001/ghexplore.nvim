@@ -33,29 +33,38 @@ function M.setup(opts)
   return M.config
 end
 
---- Open a sandbox for `url`. Empty/nil => ui prompts for a URL (M4).
+--- Open a sandbox for `url`. Empty/nil => ui prompts for a URL.
 ---@param url string|nil e.g. "https://github.com/owner/repo"
 function M.open(url)
   require("ghexplore.ui").open(url or "")
 end
 
---- Grab a single file without cloning. Empty/nil => ui prompts (M4).
+--- Grab a single file without cloning. Empty/nil => ui prompts.
 ---@param file_url string|nil e.g. "https://github.com/owner/repo/blob/main/README.md"
 ---@param dest string|nil file or directory target; nil => download_path
 function M.grab(file_url, dest)
   require("ghexplore.grab").grab(file_url or "", dest)
 end
 
---- Pick a sandbox to resume (M4 picker; M3 falls back to vim.ui.select).
+--- Pick a sandbox to resume in a float picker.
 function M.list()
   require("ghexplore.ui").list()
 end
 
---- Discard a sandbox. Empty/nil => ui prompts (M4).
+--- Discard a sandbox. Empty/nil => float picker.
 ---@param name string|nil sandbox id or url
 ---@param bang boolean|nil true => skip confirm
 function M.discard(name, bang)
   require("ghexplore.ui").discard(name or "", bang or false)
+end
+
+--- Preview a remote file in a float (first 8KB). No clone, no disk write.
+--- Empty/nil => ui prompts for a file URL.
+---@param file_url string|nil e.g. "https://github.com/owner/repo/blob/main/README.md"
+---@param opts table|nil { max_bytes?, title? }
+function M.preview(file_url, opts)
+  -- empty => delegate to ui.preview, which owns the only vim.ui prompt
+  require("ghexplore.ui").preview(file_url or "", opts)
 end
 
 return M

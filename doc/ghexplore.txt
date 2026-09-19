@@ -1,5 +1,8 @@
 *ghexplore.txt*  Sandbox GitHub repos without leaving Neovim
 
+M4 status: float picker (`:GhexploreList`, `<CR>` resume, `d` discard,
+`q`/`<Esc>` close) + `:GhexplorePreview` (first 8KB, no clone).
+
 Author: ghexplore.nvim contributors
 License: MIT
 
@@ -22,8 +25,7 @@ files without cloning (ghgrab parity).
   :Ghexplore https://github.com/owner/repo
   :GhexploreGrab https://github.com/owner/repo/blob/main/README.md
 
-M0 status: commands exist; open/grab/list/discard land in M2-M4.
-See PLAN.md for milestones.
+M4 status: float picker + preview shipped; M5 (health/docs) next.
 
 ==============================================================================
 2. SETUP                                                *ghexplore-setup*
@@ -42,8 +44,11 @@ Full defaults: `lua/ghexplore/config.lua`.
 
 :Ghexplore [url] ......... Open sandbox (reuse if exists).
 :GhexploreGrab <url> [dest]  Grab single file, no clone.
-:GhexploreList ............ Resume a sandbox.
+:GhexploreList ............ Resume a sandbox (float: `<CR>` open,
+                            `d` discard, `q`/`<Esc>` close).
 :GhexploreDiscard [!] [name]  Delete a sandbox (! = no confirm).
+:GhexplorePreview [file-url]  Preview a remote file (first 8KB,
+                            no clone).
 
 ==============================================================================
 4. LUA API                                              *ghexplore-api*
@@ -54,7 +59,12 @@ Full defaults: `lua/ghexplore/config.lua`.
   require("ghexplore").grab(file_url, dest)
   require("ghexplore").list()
   require("ghexplore").discard(name, bang)
+  require("ghexplore").preview(file_url, opts)
 <
+
+Picker buffer (`ghexplore` filetype): `j/k` move, `<CR>` resume,
+`d` discard, `q`/`<Esc>` close. Maps are buffer-local; `:map` stays
+clean.
 
 ==============================================================================
 5. HEALTH                                               *ghexplore-health*

@@ -503,12 +503,12 @@ function M.discard(id_or_url, force, on_done)
   if not id or not dir then
     return finish(false, "invalid sandbox: " .. vim.trim(id_or_url))
   end
+  if not exists then
+    return finish(false, "no such sandbox: " .. id)
+  end
   local root = M.root()
   if not is_inside(root, dir) then
     return finish(false, "refusing to discard outside sandbox root: " .. dir)
-  end
-  if not exists then
-    return finish(false, "no such sandbox: " .. id)
   end
   if rm_rf(dir) and vim.uv.fs_stat(dir) == nil then
     return finish(true, nil)

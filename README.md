@@ -2,7 +2,7 @@
 
 Sandbox a GitHub repo inside Neovim: explore, build, edit — then discard or resume later. Plus single-file grab without cloning (ghgrab parity).
 
-> Status: **M0 scaffold**. Commands exist; `open`/`grab`/`list`/`discard` land in M2–M4. See `PLAN.md`.
+> Status: **M4 explorer UI**. `:GhexploreList` float + `:GhexplorePreview` shipped; M5 (health/docs) next.
 
 ## Install (prod, once published)
 
@@ -46,7 +46,8 @@ require("ghexplore").setup({ jobs = 1 })
 ```vim
 :Ghexplore https://github.com/owner/repo
 :GhexploreGrab https://github.com/owner/repo/blob/main/README.md
-:GhexploreList
+:GhexploreList                    " float: <CR> resume, d discard, q close
+:GhexplorePreview https://github.com/owner/repo/blob/main/README.md
 :GhexploreDiscard
 ```
 

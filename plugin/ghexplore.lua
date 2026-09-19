@@ -20,6 +20,10 @@ vim.api.nvim_create_user_command("GhexploreList", function()
   require("ghexplore").list()
 end, { desc = "List sandboxes to resume" })
 
+vim.api.nvim_create_user_command("GhexplorePreview", function(args)
+  require("ghexplore").preview(args.args ~= "" and args.args or nil)
+end, { nargs = "?", desc = "Preview a remote file without cloning" })
+
 vim.api.nvim_create_user_command("GhexploreDiscard", function(args)
   require("ghexplore").discard(args.args, args.bang)
 end, { nargs = "?", bang = true, desc = "Discard a sandbox" })
