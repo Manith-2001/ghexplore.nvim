@@ -1,0 +1,53 @@
+name: test
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  NVIM_VERSION: v0.12.5
+  STYLUA_VERSION: v2.5.2
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Neovim
+        run: |
+          curl -sSL -o /tmp/nvim.tar.gz "https://github.com/neovim/neovim/releases/download/${NVIM_VERSION}/nvim-linux-x86_64.tar.gz"
+          tar xzf /tmp/nvim.tar.gz -C /tmp
+          echo "/tmp/nvim-linux-x86_64/bin" >> "$GITHUB_PATH"
+
+      - name: Install stylua
+        run: |
+          curl -sSL -o /tmp/stylua.zip "https://github.com/JohnnyMorganz/StyLua/releases/download/${STYLUA_VERSION}/stylua-linux-x86_64.zip"
+          unzip -q /tmp/stylua.zip -d /tmp/stylua-bin
+          echo "/tmp/stylua-bin" >> "$GITHUB_PATH"
+
+      - name: Versions
+        run: |
+          nvim --version | head -n 2
+          stylua --version
+
+      - name: stylua check
+        run: stylua --check lua/ plugin/ tests/ after/
+
+      - name: Install plenary.nvim (test-only, unpacked beside checkout)
+        run: |
+          git clone --depth 1 https://github.com/nvim-lua/plenary.nvim /tmp/plenary.nvim
+
+      - name: Headless spec suite (offline, no network)
+        env:
+          GHEXPLORER_ROOT: ${{ github.workspace }}
+        run: |
+          nvim --headless --clean -u NONE \
+            --cmd "set rtp+=${{ github.workspace }}" \
+            --cmd "set rtp+=/tmp/plenary.nvim" \
+            -c "lua require('ghexplore').setup({jobs=1}); require('plenary.test_harness').test_directory('tests/spec', {minimal_init='tests/minimal-init.lua'})" 2>&1

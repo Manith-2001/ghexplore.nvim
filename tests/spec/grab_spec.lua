@@ -1,4 +1,6 @@
--- M2: gh module tests. Header parsing + error taxonomy are pure (no network).
+-- M2 + M6: gh header parsing + error taxonomy are pure (no network).
+-- Live network assertions live in grab_live_spec.lua, gated on opts.env
+-- (plenary runs each file in its own nvim with cwd = repo root).
 describe("ghexplore.gh headers", function()
   local gh = require("ghexplore.gh")
 

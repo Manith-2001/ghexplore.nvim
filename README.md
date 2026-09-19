@@ -2,13 +2,13 @@
 
 Sandbox a GitHub repo inside Neovim: explore, build, edit — then discard or resume later. Plus single-file grab without cloning (ghgrab parity).
 
-> Status: **M5 polish**. Config validation, full health, finished docs. Next: M6 (CI/release).
+> Status: **M6 CI + release**. Pinned `v0.1.0` below; `master` tracks development.
 
-## Install (prod, once published)
+## Install (prod)
 
 ```lua
 vim.pack.add({
-  { src = "https://github.com/<you>/ghexplore.nvim" },
+  { src = "https://github.com/Manith-2001/ghexplore.nvim", version = "v0.1.0" },
 })
 
 require("ghexplore").setup({
