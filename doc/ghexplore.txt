@@ -1,8 +1,5 @@
 *ghexplore.txt*  Sandbox GitHub repos without leaving Neovim
 
-M4 status: float picker (`:GhexploreList`, `<CR>` resume, `d` discard,
-`q`/`<Esc>` close) + `:GhexplorePreview` (first 8KB, no clone).
-
 Author: ghexplore.nvim contributors
 License: MIT
 
@@ -13,7 +10,10 @@ CONTENTS                                                *ghexplore-contents*
   2. Setup ................... |ghexplore-setup|
   3. Commands ................ |ghexplore-commands|
   4. Lua API ................. |ghexplore-api|
-  5. Health .................. |ghexplore-health|
+  5. Picker .................. |ghexplore-picker|
+  6. Sandbox layout .......... |ghexplore-layout|
+  7. Health .................. |ghexplore-health|
+  8. Troubleshooting ......... |ghexplore-troubleshooting|
 
 ==============================================================================
 1. INTRO                                                *ghexplore-intro*
@@ -24,20 +24,34 @@ files without cloning (ghgrab parity).
 
   :Ghexplore https://github.com/owner/repo
   :GhexploreGrab https://github.com/owner/repo/blob/main/README.md
-
-M4 status: float picker + preview shipped; M5 (health/docs) next.
+  :GhexploreList                    " float picker: <CR> resume
+  :GhexplorePreview https://github.com/owner/repo/blob/main/README.md
 
 ==============================================================================
 2. SETUP                                                *ghexplore-setup*
 
 >lua
   require("ghexplore").setup({
+    data_dir = vim.fn.stdpath("data") .. "/ghexplore",
     download_path = vim.fn.expand("~/Downloads"),
-    jobs = 4,
+    clone_depth = 1,          -- 0 = full history
+    clone_args = {},          -- extra `git clone` args
+    reuse = true,             -- reopen existing sandbox, no re-clone
+    open_cmd = "tabnew | tcd %s | edit %s",
+    confirm_discard = true,
+    jobs = 4,                 -- parallel downloads for grab
+    token = nil,              -- nil => GITHUB_TOKEN / `gh auth token`
+    picker = "float",         -- "float" | "select"
+    keymaps = {},             -- e.g. { open = "<leader>gx" }
   })
 <
 
-Full defaults: `lua/ghexplore/config.lua`.
+All keys are validated by `setup()` (warn-only). Bad values notify
+once; the plugin keeps running on merged defaults where possible.
+
+Suggested mapping (user config, never forced by the plugin): >lua
+  vim.keymap.set("n", "<leader>gx", "<Plug>(GhexploreOpen)")
+<
 
 ==============================================================================
 3. COMMANDS                                             *ghexplore-commands*
@@ -54,21 +68,70 @@ Full defaults: `lua/ghexplore/config.lua`.
 4. LUA API                                              *ghexplore-api*
 
 >lua
-  require("ghexplore").setup(opts)
-  require("ghexplore").open(url)
+  require("ghexplore").setup(opts)   -- idempotent, merges + validates
+  require("ghexplore").open(url)     -- "" => prompts for URL
   require("ghexplore").grab(file_url, dest)
-  require("ghexplore").list()
+  require("ghexplore").list()        -- picker per `picker` option
   require("ghexplore").discard(name, bang)
   require("ghexplore").preview(file_url, opts)
 <
 
-Picker buffer (`ghexplore` filetype): `j/k` move, `<CR>` resume,
-`d` discard, `q`/`<Esc>` close. Maps are buffer-local; `:map` stays
-clean.
+==============================================================================
+5. PICKER                                               *ghexplore-picker*
+
+`picker = "float"` (default): centered float, one line per sandbox
+(`<id> @<branch> (<date>)`, newest first). Buffer-local maps only:
+
+  j/k ......... move (native cursor motion)
+  <CR> ........ resume highlighted sandbox
+  d ........... discard highlighted sandbox (confirms)
+  q / <Esc> ... close
+
+No global maps are set; `:map` stays clean.
+
+`picker = "select"`: plain |vim.ui.select| instead. Telescope and
+snacks.nvim override `vim.ui.select` when installed, so this setting
+auto-delegates to them with no hard dependency (compose, don't
+bundle). Headless Neovim (no window UI) also falls back to
+`vim.ui.select` automatically.
 
 ==============================================================================
-5. HEALTH                                               *ghexplore-health*
+6. SANDBOX LAYOUT                                       *ghexplore-layout*
+
+>{
+  <data_dir>/sandboxes/<owner>__<repo>__<branch>/
+    .ghexplore.json      { url, owner, repo, branch, subpath,
+                           created, last_opened, clone_args }
+    <checkout...>        real git repo (`--depth 1` by default)
+}<
+
+Reopening a sandbox only bumps `last_opened` (offline-safe, no
+network). `:GhexploreDiscard` deletes the directory; it refuses
+targets outside the sandbox root.
+
+==============================================================================
+7. HEALTH                                               *ghexplore-health*
 
   :checkhealth ghexplore
+
+Reports: Neovim version, `git` / `curl` / `gh` executables, config
+validity, `data_dir` + `download_path` writability, sandbox count,
+and token presence masked as `abcd…wxyz` (never the full token).
+
+==============================================================================
+8. TROUBLESHOOTING                              *ghexplore-troubleshooting*
+
+- `git missing` ......... install git (sandboxes need `git clone`).
+- `curl missing` ........ install curl (grab/preview need it).
+- `no token` ............ public repos work; for private repos or
+                          higher rate limits set `GITHUB_TOKEN`.
+- `NotFound (404)` ...... repo is private (set a token) or the URL
+                          branch/path is wrong.
+- `InvalidToken` ........ check `GITHUB_TOKEN` / `gh auth token`.
+- `RateLimit` ........... wait, or set `GITHUB_TOKEN`.
+- `not a file url` ...... grab/preview need `.../blob/<branch>/<path>`.
+- `data_dir not writable`  check `setup({ data_dir = ... })` perms.
+- big repos ............. `setup({ clone_args = { "--filter=blob:none" } })`
+                          or `clone_depth = 0` for full history.
 
 vim:tw=78:ts=8:ft=help:norl:

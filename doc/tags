@@ -3,5 +3,8 @@ ghexplore-commands	ghexplore.txt	/*ghexplore-commands*
 ghexplore-contents	ghexplore.txt	/*ghexplore-contents*
 ghexplore-health	ghexplore.txt	/*ghexplore-health*
 ghexplore-intro	ghexplore.txt	/*ghexplore-intro*
+ghexplore-layout	ghexplore.txt	/*ghexplore-layout*
+ghexplore-picker	ghexplore.txt	/*ghexplore-picker*
 ghexplore-setup	ghexplore.txt	/*ghexplore-setup*
+ghexplore-troubleshooting	ghexplore.txt	/*ghexplore-troubleshooting*
 ghexplore.txt	ghexplore.txt	/*ghexplore.txt*

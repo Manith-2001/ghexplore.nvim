@@ -2,7 +2,7 @@
 
 Sandbox a GitHub repo inside Neovim: explore, build, edit — then discard or resume later. Plus single-file grab without cloning (ghgrab parity).
 
-> Status: **M4 explorer UI**. `:GhexploreList` float + `:GhexplorePreview` shipped; M5 (health/docs) next.
+> Status: **M5 polish**. Config validation, full health, finished docs. Next: M6 (CI/release).
 
 ## Install (prod, once published)
 
@@ -14,6 +14,7 @@ vim.pack.add({
 require("ghexplore").setup({
   download_path = vim.fn.expand("~/Downloads"),
   jobs = 4,
+  picker = "float", -- or "select" (auto-delegates to telescope/snacks)
   -- token = vim.env.GHGRAB_GITHUB_TOKEN or vim.env.GITHUB_TOKEN,
 })
 ```
@@ -47,8 +48,13 @@ require("ghexplore").setup({ jobs = 1 })
 :Ghexplore https://github.com/owner/repo
 :GhexploreGrab https://github.com/owner/repo/blob/main/README.md
 :GhexploreList                    " float: <CR> resume, d discard, q close
-:GhexplorePreview https://github.com/owner/repo/blob/main/README.md
+:GhexplorePreview https://github.com/owner/repo/blob/main/README.md  " no clone
 :GhexploreDiscard
+```
+
+Then `:checkhealth ghexplore`, `:help ghexplore`. All `setup()` keys are
+validated (warn-only); health reports executables, dirs, sandbox count,
+and token presence masked as `abcd…wxyz`.
 ```
 
 ## Layout

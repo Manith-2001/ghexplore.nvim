@@ -16,7 +16,18 @@ local function active_config()
   if ok2 and cfg and cfg.defaults then
     return cfg.defaults
   end
-  return { open_cmd = "tabnew | tcd %s | edit %s", confirm_discard = true }
+  return { open_cmd = "tabnew | tcd %s | edit %s", confirm_discard = true, picker = "float" }
+end
+
+--- Plain `vim.ui.select` picker. Zero deps by design: telescope/snacks
+--- override `vim.ui.select` when installed, so `picker = "select"`
+--- auto-delegates with no hard dependency (compose, don't bundle).
+local function select_picker(items, title, on_pick)
+  vim.ui.select(items, { prompt = title .. ":", format_item = format_item }, function(choice)
+    if choice then
+      on_pick(choice)
+    end
+  end)
 end
 
 local function is_valid_win(win)
@@ -178,11 +189,7 @@ function M.open_picker(items, opts)
   end)
   if not ok or not buf or not win then
     -- headless / UI-less fallback: plain vim.ui.select (zero deps)
-    vim.ui.select(items, { prompt = "Ghexplore sandboxes:", format_item = format_item }, function(choice)
-      if choice then
-        M.open(choice.id)
-      end
-    end)
+    select_picker(items, opts.title or "Ghexplore sandboxes", on_pick)
     return nil, nil
   end
   M._picker_buf = buf
@@ -214,10 +221,22 @@ function M.open_picker(items, opts)
   return buf, win
 end
 
---- List/resume sandboxes in a float picker.
+--- List/resume sandboxes. `picker = "select"` uses vim.ui.select
+--- (telescope/snacks delegate); default "float" uses the float picker
+--- with a vim.ui.select fallback when no window UI is available.
 function M.list()
   local sandbox = require("ghexplore.sandbox")
   local items = sandbox.list()
+  if #items == 0 then
+    vim.notify("ghexplore: no sandboxes", vim.log.levels.INFO)
+    return
+  end
+  if active_config().picker == "select" then
+    select_picker(items, "Ghexplore sandboxes", function(choice)
+      M.open(choice.id)
+    end)
+    return
+  end
   M.open_picker(items, { title = "Ghexplore sandboxes" })
 end
 
